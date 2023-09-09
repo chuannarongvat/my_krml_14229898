@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "my_krml_14229898"
+version = "0.1.0"
+description = "My first package used for advanced machine learning"
+authors = ["chuannarongvat"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.group.dev.dependencies]
+pandas = "2.01"
+scikit-learn = "1.2.2"
+pytest = "7.4.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
