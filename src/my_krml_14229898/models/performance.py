@@ -119,7 +119,7 @@ def print_classifier_scores(y_preds, y_actuals, set_name=None, metrics=None):
             print(f"{metric}: {value}")
 
     
-def assess_classifier_set(model, features, target, set_name=''):
+def assess_classifier_set(model, features, target, set_name='', metrics=None):
     """Save the predictions from a trained model on a given set and print its accuracy and F1 scores
 
     Parameters
@@ -137,9 +137,9 @@ def assess_classifier_set(model, features, target, set_name=''):
     -------
     """
     preds = model.predict(features)
-    print_classifier_scores(y_preds=preds, y_actuals=target, set_name=set_name)
+    print_classifier_scores(y_preds=preds, y_actuals=target, set_name=set_name, metrics=metrics)
     
-def fit_assess_classifier(model, X_train, y_train, X_val, y_val):
+def fit_assess_classifier(model, X_train, y_train, X_val, y_val, metrics=None):
     """Train a classifier model, print its accuracy and F1 scores on the training and validation set and return the trained model
 
     Parameters
@@ -161,6 +161,6 @@ def fit_assess_classifier(model, X_train, y_train, X_val, y_val):
     -------
     """
     model.fit(X_train, y_train)
-    assess_classifier_set(model, X_train, y_train, set_name='Training')
-    assess_classifier_set(model, X_val, y_val, set_name='Validation')
+    assess_classifier_set(model, X_train, y_train, set_name='Training', metrics=metrics)
+    assess_classifier_set(model, X_val, y_val, set_name='Validation', metrics=metrics)
     return model
