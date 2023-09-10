@@ -65,9 +65,9 @@ def fit_assess_regressor(model, X_train, y_train, X_val, y_val):
     assess_regressor_set(model, X_val, y_val, set_name='Validation')
     return model
 
-def print_classifier_scores(y_preds, y_actuals, set_name=None):
-    """Print the Accuracy and F1 score for the provided data.
-    The value of the 'average' parameter for F1 score will be determined according to the number of distinct values of the target variable: 'binary' for bianry classification' or 'weighted' for multi-classs classification
+def print_classifier_scores(y_preds, y_actuals, set_name=None, metrics=None):
+    """Print the Metrics Score for the provided data.
+    The value of the 'average' parameter for F1 score will be determined according to the number of distinct values of the target variable: 'binary' for binary classification or 'weighted' for multi-class classification
 
     Parameters
     ----------
@@ -77,17 +77,47 @@ def print_classifier_scores(y_preds, y_actuals, set_name=None):
         Actual target
     set_name : str
         Name of the set to be printed
+    metrics : list of str
+        List of metrics to be printed ('accuracy', 'f1', 'precision', 'recall', 'roc_auc')
+
     Returns
     -------
     """
-    from sklearn.metrics import accuracy_score
-    from sklearn.metrics import f1_score
+    from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
     import pandas as pd
 
     average = 'weighted' if pd.Series(y_actuals).nunique() > 2 else 'binary'
+    
+    if metrics is None:
+        metrics = []
+    
+    results = {}
+    
+    if 'accuracy' in metrics:
+        results['accuracy'] = accuracy_score(y_actuals, y_preds)
+    
+    if 'f1' in metrics:
+        results['f1'] = f1_score(y_actuals, y_preds, average=average)
+    
+    if 'precision' in metrics:
+        results['precision'] = precision_score(y_actuals, y_preds, average=average)
+        
+    if 'recall' in metrics:
+        results['recall'] = recall_score(y_actuals, y_preds, average=average)
+        
+    if 'roc_auc' in metrics:
+        try:
+            results['roc_auc'] = roc_auc_score(y_actuals, y_preds, average=average)
+        except ValueError:
+            pass
+    
+    if set_name is not None:
+        for metric, value in results.items():
+            print(f"{metric} {set_name}: {value}")
+    else:
+        for metric, value in results.items():
+            print(f"{metric}: {value}")
 
-    print(f"Accuracy {set_name}: {accuracy_score(y_actuals, y_preds)}")
-    print(f"F1 {set_name}: {f1_score(y_actuals, y_preds, average=average)}")
     
 def assess_classifier_set(model, features, target, set_name=''):
     """Save the predictions from a trained model on a given set and print its accuracy and F1 scores
