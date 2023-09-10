@@ -266,3 +266,59 @@ def plot_num_feature(feautres, num_feature, target):
     plt.legend()
     plt.title(num_feature)
     plt.show()
+    
+def plot_target(features, target):
+    """Plot the target feature
+    
+    Parameters
+    ----------
+    features : pd.DataFrame
+        Input dataframe
+    target : str
+    
+    Returns
+    -------
+    Distribution Graph
+    """
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    palette = 'ch:.25'
+    
+    ax = sns.countplot(x=target, data=features, palette=palette)
+    
+    total = len(features)
+    for p in ax.patches:
+        percentage = '{:.1f}%'.format(100 * p.get_height() / total)
+        x = p.get_x() + p.get_width() / 2
+        y = p.get_height()
+        ax.annotate(percentage, (x, y), ha='center')
+    
+    plt.title('target')
+    plt.show()
+    
+def plot_correlation(features, target):
+    """Plot the correlation between the features and the target feature
+    
+    Parameters
+    ----------
+    features : pd.DataFrame
+        Input dataframe containing the numerical features only.
+    target : str
+    
+    Returns
+    -------
+    Horizontal Bar Graph
+    """
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    palette = 'ch:.25'
+    
+    df_corr = features.corr()[target].sort_values(ascending=False).reset_index()
+    df_corr.columns = ['Feature', 'Correlation']
+    
+    plt.figure(figsize=(12, 6))
+    sns.barplot(x='Feature', y='Correlation', data=df_corr, palette=palette)
+    
+    plt.title('Correlation between the features and target')
+    plt.xticks(rotation=90)
+    plt.show
