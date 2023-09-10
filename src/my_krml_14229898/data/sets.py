@@ -163,7 +163,6 @@ def missing_values(features):
         print('Features with missing values:')
         print(missing_data)
         
-@staticmethod
 def cat_num_split(features):
     """Split categorical and numerical columns
 
