@@ -204,7 +204,7 @@ def count_unique_values(features, cat_features):
     
     return unique_values
 
-def plot_cat_cols(feautres, cat_feature, target):
+def plot_cat_feature(feautres, cat_feature, target):
     """Plot the Categorical Features with the target feature
     
     Parameters
@@ -220,8 +220,9 @@ def plot_cat_cols(feautres, cat_feature, target):
     """
     import matplotlib.pyplot as plt
     import seaborn as sns
+    palette='ch:.25'
     
-    ax = sns.countplot(x=cat_feature, data=feautres, hue=target)
+    ax = sns.countplot(x=cat_feature, data=feautres, hue=target, palette=palette)
     
     total = len(feautres)
     for p in ax.patches:
@@ -234,7 +235,7 @@ def plot_cat_cols(feautres, cat_feature, target):
     plt.title(cat_feature)
     plt.show()
     
-def plot_num_cols(feautres, num_feature, target):
+def plot_num_feature(feautres, num_feature, target):
     """Plot the Numerical Features with the target feature
     
     Parameters
@@ -248,10 +249,20 @@ def plot_num_cols(feautres, num_feature, target):
     -------
     Distribution Graph
     """
+    import numpy as np
     import matplotlib.pyplot as plt
     import seaborn as sns
+    palette = 'ch:.25'
     
-    ax = sns.distplot(feautres[num_feature], label=num_feature, kde=False)
-    ax.set_title(num_feature)
+    num_bins = int(np.sqrt(len(feautres[num_feature])))
+        
+    sns.histplot(data=feautres, x=num_feature, kde=True, hue=target, palette=palette, bins=num_bins)
+        
+    mean = feautres[num_feature].mean()
+    median = feautres[num_feature].median()
+        
+    plt.axvline(mean, color='r', linestyle='dashed', linewidth=2, label=f'Mean: {mean:.2f}')
+    plt.axvline(median, color='g', linestyle='dashed', linewidth=2, label=f'Median: {median:.2f}')                   
     plt.legend()
+    plt.title(num_feature)
     plt.show()
