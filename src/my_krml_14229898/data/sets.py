@@ -178,8 +178,8 @@ def cat_num_split(features):
     list
         List of numerical columns
     """
-    cat_features = [feature for feature in features.columns if features[features].dtypes == 'object']
-    num_features = [feature for feature in features.columns if features[features].dtypes!= 'object']
+    cat_features = [feature for feature in features.columns if features[feature].dtypes=='object']
+    num_features = [feature for feature in features.columns if features[feature].dtypes!='object']
     
     return cat_features, num_features
 
