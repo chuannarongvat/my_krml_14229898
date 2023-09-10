@@ -1,3 +1,4 @@
+import numpy as np
 class NullRegressor:
     """
     Class used as baseline model for regression problem
