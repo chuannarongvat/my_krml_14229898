@@ -83,7 +83,7 @@ def print_classifier_scores(y_preds, y_actuals, set_name=None, metrics=None):
     Returns
     -------
     """
-    from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
+    from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score, ConfusionMatrixDisplay
     import pandas as pd
 
     average = 'weighted' if pd.Series(y_actuals).nunique() > 2 else 'binary'
@@ -112,8 +112,7 @@ def print_classifier_scores(y_preds, y_actuals, set_name=None, metrics=None):
             pass
     
     if set_name is not None:
-        for metric, value in results.items():
-            print(f"{metric} {set_name}: {value}")
+        print(pd.DataFrame(results, index=[set_name]))
     else:
         for metric, value in results.items():
             print(f"{metric}: {value}")
@@ -159,8 +158,39 @@ def fit_assess_classifier(model, X_train, y_train, X_val, y_val, metrics=None):
     sklearn.base.BaseEstimator
         Trained model
     -------
-    """
+    """    
     model.fit(X_train, y_train)
+    
     assess_classifier_set(model, X_train, y_train, set_name='Training', metrics=metrics)
     assess_classifier_set(model, X_val, y_val, set_name='Validation', metrics=metrics)
+    
+    print_confusion_matrix(model, X_train, y_train, set_name='Training')
+    print_confusion_matrix(model, X_val, y_val, set_name='Validation')
+    
     return model
+
+def print_confusion_matrix(model, X, y, set_name=None, normalize=True):
+    """Print the confusion matrix for the provided data
+
+    Parameters
+    ----------
+    model: sklearn.base.BaseEstimator
+    X : Numpy Array
+    y : Numpy Array
+    set_name : str
+    normalize : bool
+    -------
+    """
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+    
+    preds = model.predict(X)
+    cm = confusion_matrix(y, preds)
+    
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    
+    display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=model.classes_)
+    display.plot(cmap='viridis', values_format='.2f' if normalize else 'd')
+    plt.title(f'{set_name} Confusion Matrix')
+    plt.show()
