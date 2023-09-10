@@ -84,17 +84,17 @@ def save_sets(X_train=None, y_train=None, X_val=None, y_val=None, X_test=None, y
     import numpy as np
 
     if X_train is not None:
-      np.save(f'{path}X_train', X_train)
+        np.save(f'{path}X_train', X_train)
     if X_val is not None:
-      np.save(f'{path}X_val',   X_val)
+        np.save(f'{path}X_val',   X_val)
     if X_test is not None:
-      np.save(f'{path}X_test',  X_test)
+        np.save(f'{path}X_test',  X_test)
     if y_train is not None:
-      np.save(f'{path}y_train', y_train)
+        np.save(f'{path}y_train', y_train)
     if y_val is not None:
-      np.save(f'{path}y_val',   y_val)
+        np.save(f'{path}y_val',   y_val)
     if y_test is not None:
-      np.save(f'{path}y_test',  y_test)
+        np.save(f'{path}y_test',  y_test)
 
 def load_sets(path='../data/processed/'):
     """Load the different locally save sets
@@ -130,3 +130,129 @@ def load_sets(path='../data/processed/'):
     y_test  = np.load(f'{path}y_test.npy' , allow_pickle=True) if os.path.isfile(f'{path}y_test.npy')  else None
 
     return X_train, y_train, X_val, y_val, X_test, y_test
+
+def missing_values(features):
+    """Count the number of missing values for each feature
+
+    Parameters
+    ----------
+    features : pd.DataFrame
+        Input dataframe
+
+    Returns
+    -------
+    dict
+        Dictionary containing the number of missing values for each feature
+    """
+    missing_values = features.isnull().sum()
+    
+    if missing_values.sum() == 0:
+        print('No missing values')
+    else:
+        missing_percentage = (features.isna().mean() * 100 ).round(2)
+        
+        missing_data = pd.DataFrame({
+            'features': missing_values.index,
+            'missing values': missing_values.values,
+            'missing percentage': missing_percentage.values
+        })
+        
+        missing_data = missing_data[missing_data['missing values'] > 0]
+        missing_data = missing_data.sort_values(by='missing values', ascending=False)
+        
+        print('Features with missing values:')
+        print(missing_data)
+        
+@staticmethod
+def cat_num_split(features):
+    """Split categorical and numerical columns
+
+    Parameters
+    ----------
+    features : pd.DataFrame
+        Input dataframe
+
+    Returns
+    -------
+    list
+        List of categorical columns
+    list
+        List of numerical columns
+    """
+    cat_features = [feature for feature in features.columns if features[features].dtypes == 'object']
+    num_features = [feature for feature in features.columns if features[features].dtypes!= 'object']
+    
+    return cat_features, num_features
+
+def count_unique_values(features, cat_features):
+    """Count the number of unique values for each categorical column
+
+    Parameters
+    ----------
+    features : pd.DataFrame
+        Input dataframe
+    cat_cols : list
+        List of categorical columns
+
+    Returns
+    -------
+    dict
+        Dictionary containing the number of unique values for each categorical column
+    """
+    unique_values = {}
+    for feature in cat_features:
+        unique_values[feature] = len(features[feature].unique())
+    
+    return unique_values
+
+def plot_cat_cols(feautres, cat_feature, target):
+    """Plot the Categorical Features with the target feature
+    
+    Parameters
+    ----------
+    features : pd.DataFrame
+        Input dataframe
+    cat_feature : str
+    target : str
+    
+    Returns
+    -------
+    Distribution Graph
+    """
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    
+    ax = sns.countplot(x=cat_feature, data=feautres, hue=target)
+    
+    total = len(feautres)
+    for p in ax.patches:
+        percentage = '{:.1f}%'.format(100 * p.get_height() / total)
+        x = p.get_x() + p.get_width() / 2
+        y = p.get_height()
+        ax.annotate(percentage, (x, y), ha='center')
+        
+    plt.xticks(rotation=90)
+    plt.title(cat_feature)
+    plt.show()
+    
+def plot_num_cols(feautres, num_feature, target):
+    """Plot the Numerical Features with the target feature
+    
+    Parameters
+    ----------
+    features : pd.DataFrame
+        Input dataframe
+    num_feature : str
+    target : str
+    
+    Returns
+    -------
+    Distribution Graph
+    """
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    
+    ax = sns.distplot(feautres[num_feature], label=num_feature, kde=False)
+    ax.set_title(num_feature)
+    plt.legend()
+    plt.show()
