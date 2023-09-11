@@ -232,6 +232,14 @@ def plot_roc_auc_curve(model, X, y, set_name=None, model_name=None):
     plt.show()
     
 def plot_importances(df, title_name=None):
+    """Plot the Feature Importance for the provided data
+    
+    Parameters
+    ----------
+    df : Pandas Dataframe
+    title_name : str
+    -------
+    """
     import matplotlib.pyplot as plt
     import seaborn as sns
     
@@ -246,7 +254,24 @@ def plot_importances(df, title_name=None):
     plt.xticks(rotation=90)
     plt.show()
     
-def permutation_importance(df, model, X, y, set_name=None, model_name=None):
+def permutation_importance(df, target_feature, model, X, y, set_name=None, model_name=None):
+    """
+    Plot the Permutation Importance for the provided data
+    
+    Parameters
+    ----------
+    df : Pandas Dataframe
+    target_feature : str
+    model : sklearn.base.BaseEstimator
+    X : Numpy Array
+    y : Numpy Array
+    set_name : str
+    model_name : str
+    ----------
+    Returns
+    permutation_importance : Pandas Dataframe
+    """
+
     from sklearn.inspection import permutation_importance
     import pandas as pd
     import matplotlib.pyplot as plt
@@ -260,7 +285,10 @@ def permutation_importance(df, model, X, y, set_name=None, model_name=None):
         feature_name = df.columns[i]
         feature_imp = r.importances_mean[i]
         
-        permu_imp.append({'feature': feature_name, 'importance': feature_imp})
+        if feature_name == target_feature:
+            pass
+        else:
+            permu_imp.append({'feature': feature_name, 'importance': feature_imp})
     
     permu_imp_df =  pd.DataFrame(permu_imp).sort_values(by='importance', ascending=False)
     
