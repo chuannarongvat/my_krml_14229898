@@ -107,7 +107,7 @@ def print_classifier_scores(y_preds, y_actuals, set_name=None, metrics=None):
         
     if 'roc_auc' in metrics:
         try:
-            results['roc_auc'] = roc_auc_score(y_actuals, y_preds, average=average)
+            results['roc_auc'] = roc_auc_score(y_actuals, y_preds)
         except ValueError:
             pass
     
@@ -131,6 +131,8 @@ def assess_classifier_set(model, features, target, set_name='', metrics=None):
         Target variable
     set_name : str
         Name of the set to be printed
+    metrics : list of str
+        List of metrics to be used for training and validation
 
     Returns
     -------
@@ -153,6 +155,8 @@ def fit_assess_classifier(model, X_train, y_train, X_val, y_val, metrics=None):
         Features for the validation set
     y_train : Numpy Array
         Target for the validation set
+    metrics : list of str
+        List of metrics to be used for training and validation
 
     Returns
     sklearn.base.BaseEstimator
