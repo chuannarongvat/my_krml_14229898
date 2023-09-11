@@ -131,6 +131,52 @@ def load_sets(path='../data/processed/'):
 
     return X_train, y_train, X_val, y_val, X_test, y_test
 
+def save_sets_smote(X_train_resampled=None, y_train_resampled=None, path='../data/processed/'):
+    """Save the different SMOTE sets locally
+
+    Parameters
+    ----------
+    X_train_resampled: Numpy Array
+        Features for the training set resampled
+    y_train_resampled: Numpy Array
+        Target for the training set resampled
+    path : str
+        Path to the folder where the sets will be saved (default: '../data/processed/')
+
+    Returns
+    -------
+    """
+    import numpy as np
+
+    if X_train_resampled is not None:
+        np.save(f'{path}X_train_resampled', X_train_resampled)
+    if y_train_resampled is not None:
+        np.save(f'{path}y_train_resampled', y_train_resampled)
+        
+def load_sets_smote(path='../data/processed/'):
+    """Load the different locally save sets
+
+    Parameters
+    ----------
+    path : str
+        Path to the folder where the sets are saved (default: '../data/processed/')
+
+    Returns
+    -------
+    Numpy Array
+        Features for the training set
+    Numpy Array
+        Target for the training set
+    """
+    import numpy as np
+    import os.path
+
+    X_train_resampled = np.load(f'{path}X_train_resampled.npy', allow_pickle=True) if os.path.isfile(f'{path}X_train_resampled.npy') else None
+    y_train_resampled = np.load(f'{path}y_train_resampled.npy', allow_pickle=True) if os.path.isfile(f'{path}y_train_resampled.npy') else None
+    
+    return X_train_resampled, y_train_resampled
+
+
 def missing_values(features):
     """Count the number of missing values for each feature
 
