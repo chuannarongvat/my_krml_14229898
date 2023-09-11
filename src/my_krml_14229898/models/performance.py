@@ -168,12 +168,9 @@ def fit_assess_classifier(model, X_train, y_train, X_val, y_val, metrics=None):
     assess_classifier_set(model, X_train, y_train, set_name='Training', metrics=metrics)
     assess_classifier_set(model, X_val, y_val, set_name='Validation', metrics=metrics)
     
-    print_confusion_matrix(model, X_train, y_train, set_name='Training')
-    print_confusion_matrix(model, X_val, y_val, set_name='Validation')
-    
     return model
 
-def print_confusion_matrix(model, X, y, set_name=None, normalize=True):
+def plot_confusion_matrix(model, X, y, set_name=None, normalize=True):
     """Print the confusion matrix for the provided data
 
     Parameters
@@ -189,13 +186,89 @@ def print_confusion_matrix(model, X, y, set_name=None, normalize=True):
     import numpy as np
     from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
     
-    preds = model.predict(X)
-    cm = confusion_matrix(y, preds)
+    y_preds = model.predict(X)
+    cm = confusion_matrix(y, y_preds)
     
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
     
     display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=model.classes_)
     display.plot(cmap='viridis', values_format='.2f' if normalize else 'd')
-    plt.title(f'{set_name} Confusion Matrix')
+    plt.title(f'Confusion Matrix for {set_name} Set')
     plt.show()
+
+
+def plot_roc_auc_curve(model, X, y, set_name=None, model_name=None):
+    """Plot the Receiver Operating Characteristic Curve for the provided data
+    
+    Parameters
+    ----------
+    model: sklearn.base.BaseEstimator
+    X : Numpy Array
+    y : Numpy Array
+    set_name : str
+    model_name : str
+    -------
+    
+    """
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import roc_curve, roc_auc_score, auc
+    
+    y_prob = model.predict_proba(X)[:, 1]
+    
+    fpr, tpr, _ = roc_curve(y, y_prob)
+    roc_auc = auc(fpr, tpr)
+    
+    plt.figure()
+    label = f'{model_name} (AUC = {roc_auc:.2f})' if model_name else f'(AUC = {roc_auc:.2f})'
+    plt.plot(fpr, tpr, color='darkorange', lw=2, label=label)
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title(f'Receiver Operating Characteristic Curve for {set_name} Set')
+    plt.legend(loc='lower right')
+    plt.show()
+    
+def plot_importances(df, title_name=None):
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    
+    sns.barplot(data=df, x='feature', y='importance', palette='ch:.25')
+    
+    if title_name is not None:
+        plt.title(title_name)
+    else:
+        plt.title('Feature Importance')
+    
+    sns.barplot(data=df, x='feature', y='importance', palette='ch:.25')
+    plt.xticks(rotation=90)
+    plt.show()
+    
+def permutation_importance(df, model, X, y, set_name=None, model_name=None):
+    from sklearn.inspection import permutation_importance
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    
+    r = permutation_importance(model, X, y, n_repeats=30,random_state=42)
+    
+    permu_imp = []
+    
+    for i in r.importances_mean.argsort()[::-1]:
+        feature_name = df.columns[i]
+        feature_imp = r.importances_mean[i]
+        
+        permu_imp.append({'feature': feature_name, 'importance': feature_imp})
+    
+    permu_imp_df =  pd.DataFrame(permu_imp).sort_values(by='importance', ascending=False)
+    
+    plot_importances(permu_imp_df, title_name=f'{model_name} Permutation Importance on {set_name} Set')
+    return permu_imp_df
+    
+    
+    
+    
+    
+    
