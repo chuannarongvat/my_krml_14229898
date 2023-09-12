@@ -221,8 +221,8 @@ def plot_roc_auc_curve(model, X, y, set_name=None, model_name=None):
     
     plt.figure()
     label = f'{model_name} (AUC = {roc_auc:.2f})' if model_name else f'(AUC = {roc_auc:.2f})'
-    plt.plot(fpr, tpr, color='darkorange', lw=2, label=label)
-    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.plot([0, 1], [0, 1], lw=2, linestyle='--')
+    plt.plot(fpr, tpr, lw=2, marker='.', label=label)
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')
