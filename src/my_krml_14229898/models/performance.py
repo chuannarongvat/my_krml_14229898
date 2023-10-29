@@ -359,10 +359,10 @@ def plot_adaboost_feature_importances(model, feature_names):
     plt.tight_layout()
     plt.show()
     
-def generate_neighbors(df, X_val_df):
+def generate_neighbors(df, X_val_df, n_neighbors):
     import pandas as pd
     from sklearn.neighbors import NearestNeighbors
-    knn = NearestNeighbors(n_neighbors=20, algorithm='brute').fit(X_val_df)
+    knn = NearestNeighbors(n_neighbors=n_neighbors, algorithm='brute').fit(X_val_df)
     
     distances, indices = knn.kneighbors(df.iloc[:, :-3].values)
     neighbors_val = knn._fit_X[indices]
@@ -389,13 +389,15 @@ def explain_instances_with_lime(df, model, training_data, num_features=20):
     """
     
     from lime.lime_tabular import LimeTabularExplainer
-    lime_explainer = LimeTabularExplainer(training_data=training_data,
+    lime_explainer = LimeTabularExplainer(training_data=training_data.values,
                                         mode='classification',
                                         feature_names=training_data.columns,
                                         discretize_continuous=False,
                                         verbose=True)
     
     for idx, instance in df.iterrows():
+        display(pd.DataFrame([instance]))
+        
         exp = lime_explainer.explain_instance(
             instance.values,
             model.predict_proba,
