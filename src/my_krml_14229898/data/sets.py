@@ -368,3 +368,59 @@ def plot_correlation(features, target):
     plt.title('Correlation between the features and target')
     plt.xticks(rotation=90)
     plt.show
+    
+def plot_histogram(df):
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+
+    # Specific column ranges
+    col_ranges = {
+        'tenure': (0, 72),
+        'MonthlyCharges': (0, 120),
+        'TotalCharges': (0, 9000)
+    }
+
+    fig, axes = plt.subplots(8, 6, figsize=(24, 18))
+    axes = [ax for axes_row in axes for ax in axes_row]
+
+    for i, c in enumerate(df.columns[:-3]):
+        if c in col_ranges:
+            limit = col_ranges[c]
+        else:
+            limit = (0, 1)
+        
+        sns.histplot(df[c], ax=axes[i], kde=True, color='orange', bins=50, binrange=limit)
+        mean = df[c].mean()
+        median = df[c].median()
+        axes[i].axvline(mean, color='red', linestyle='--', label=f"Mean: {mean:.2f}")
+        axes[i].axvline(median, color='blue', linestyle='--', label=f"Median: {median:.2f}")
+        axes[i].legend()
+        axes[i].set_xlim(limit)
+
+    plt.tight_layout()
+    plt.show()
+    
+def numpy_to_df(np_array, df, target_col):
+    """
+    Convert a numpy array to a DataFrame using column names from a reference dataframe.
+
+    Parameters
+    ----------
+    np_array : numpy array
+        The numpy array to convert.
+    dataframe : DataFrame
+        The reference dataframe to get column names from.
+    target_col : str
+        The name of the target column in the reference dataframe to exclude from the feature columns.
+
+    Returns
+    -------
+    DataFrame
+        The resulting dataframe with appropriate column names.
+    """
+
+    features_col = [col for col in df.columns if col != target_col]
+    
+    df = pd.DataFrame(np_array, columns=features_col)
+
+    return df

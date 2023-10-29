@@ -295,8 +295,111 @@ def permutation_importance(df, target_feature, model, X, y, set_name=None, model
     plot_importances(permu_imp_df, title_name=f'{model_name} Permutation Importance on {set_name} Set')
     return permu_imp_df
     
+def misclassified_samples_df(model, X, y):
+    import pandas as pd
+    """Return a dataframe containing samples that the model misclassified.
+
+    Parameters
+    ----------
+    model: sklearn.base.BaseEstimator
+    X : Numpy Array
+    y : Numpy Array
+
+    Returns
+    -------
+    DataFrame: A dataframe containing misclassified samples with their feature values.
+    """
+    y_preds = model.predict(X)
+
+    df = pd.DataFrame(X)
+    df['y_true'] = y
+    df['y_pred'] = y_preds
+
+    TP_samples = df[(df['y_true'] == 1) & (df['y_pred'] == 1)].copy()
+    TN_samples = df[(df['y_true'] == 0) & (df['y_pred'] == 0)].copy()
+    FP_samples = df[(df['y_true'] == 0) & (df['y_pred'] == 1)].copy()
+    FN_samples = df[(df['y_true'] == 1) & (df['y_pred'] == 0)].copy()
+
+    TP_samples['classification'] = 'TP'
+    TN_samples['classification'] = 'TN'
+    FP_samples['classification'] = 'FP'
+    FN_samples['classification'] = 'FN'
+
+    return TP_samples, TN_samples, FP_samples, FN_samples
+
+def plot_adaboost_feature_importances(model, feature_names):
+    """Plot feature importances from an AdaBoost model.
+
+    Parameters
+    ----------
+    model : sklearn's AdaBoost model instance
+        The trained AdaBoost model.
+    feature_names : list
+        List of feature names in the order they were fed to the model.
+
+    Returns
+    -------
+    None
+    """
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    import numpy as np
     
+    importances = model.feature_importances_
+
+    sorted_indices = np.argsort(importances)[::-1]
+    sorted_importances = importances[sorted_indices]
+    sorted_features = np.array(feature_names)[sorted_indices]
+
+    plt.figure(figsize=(12, 8))
+    sns.barplot(x=sorted_importances, y=sorted_features, palette="ch:.25")
+    plt.xlabel('Importance')
+    plt.ylabel('Feature')
+    plt.title('Feature Importances from AdaBoost')
+    plt.tight_layout()
+    plt.show()
     
+def generate_neighbors(df, X_val_df):
+    import pandas as pd
+    from sklearn.neighbors import NearestNeighbors
+    knn = NearestNeighbors(n_neighbors=20, algorithm='brute').fit(X_val_df)
     
+    distances, indices = knn.kneighbors(df.iloc[:, :-3].values)
+    neighbors_val = knn._fit_X[indices]
+    neighbors_val = neighbors_val.reshape(-1, neighbors_val.shape[-1])
+    neighbors_df = pd.DataFrame(neighbors_val, columns=df.columns[:-3])
+    neighbors_df.drop_duplicates(inplace=True)
     
+    return neighbors_df
+
+def explain_instances_with_lime(df, model, training_data, num_features=20):
+    """
+    Explain instances in a dataframe using LIME.
+
+    Parameters:
+    - df: DataFrame containing instances to be explained.
+    - classifier: The trained classifier.
+    - training_data: The data used to train the classifier.
+    - feature_names: List of feature names.
+    - class_names: List of class names.
+    - num_features: Number of top features to be shown in the explanation. Default is 20.
+
+    Returns:
+    None. Displays the LIME explanations
+    """
     
+    from lime.lime_tabular import LimeTabularExplainer
+    lime_explainer = LimeTabularExplainer(training_data=training_data,
+                                        mode='classification',
+                                        feature_names=training_data.columns,
+                                        discretize_continuous=False,
+                                        verbose=True)
+    
+    for idx, instance in df.iterrows():
+        exp = lime_explainer.explain_instance(
+            instance.values,
+            model.predict_proba,
+            top_labels=1,
+            num_features=num_features
+        )
+        exp.show_in_notebook()
