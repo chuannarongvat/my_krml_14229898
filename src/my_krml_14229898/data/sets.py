@@ -369,7 +369,7 @@ def plot_correlation(features, target):
     plt.xticks(rotation=90)
     plt.show
     
-def plot_histogram(df):
+def plot_histrogram(df):
     import seaborn as sns
     import matplotlib.pyplot as plt
 

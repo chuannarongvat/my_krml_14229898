@@ -403,3 +403,7 @@ def explain_instances_with_lime(df, model, training_data, num_features=20):
             num_features=num_features
         )
         exp.show_in_notebook()
+        
+def sample_obs(df, n_sample):
+    sampled_obs = df.sample(n=n_sample, random_state=42)
+    return sampled_obs
