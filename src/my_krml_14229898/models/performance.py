@@ -387,8 +387,8 @@ def explain_instances_with_lime(df, model, training_data, num_features=20):
     Returns:
     None. Displays the LIME explanations
     """
-    
     from lime.lime_tabular import LimeTabularExplainer
+    import pandas as pd
     lime_explainer = LimeTabularExplainer(training_data=training_data.values,
                                         mode='classification',
                                         feature_names=training_data.columns,
